@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آزمون آنلاین فارسی پنجم - فضل خدا</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <style>
+        * { box-sizing: border-box; font-family: 'Vazirmatn', sans-serif; margin: 0; padding: 0; }
+        body {
+            background: linear-gradient(135deg, #0b0f19 0%, #1e1b4b 50%, #0f172a 100%);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            padding: 15px;
+        }
+
+        /* ستاره‌ها و ماه متحرک */
+        .stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+        .star { position: absolute; background: #fff; border-radius: 50%; animation: twinkle var(--duration) infinite ease-in-out; }
+        @keyframes twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+        .moon { position: fixed; top: 30px; left: 40px; width: 50px; height: 50px; background: #fde047; border-radius: 50%; box-shadow: 0 0 25px rgba(253, 224, 71, 0.6); z-index: 0; }
+
+        /* کارت اصلی */
+        .quiz-card {
+            position: relative;
+            z-index: 10;
+            background: #ffffff;
+            width: 100%;
+            max-width: 550px;
+            border-radius: 25px;
+            border: 3px solid #f472b6; /* حاشیه صورتی */
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            padding: 25px;
+            text-align: center;
+        }
+
+        .designer-header, .designer-footer { font-size: 14px; color: #94a3b8; margin-bottom: 10px; font-weight: 500; }
+        .designer-footer { margin-top: 20px; margin-bottom: 0; }
+
+        h1 { font-size: 22px; color: #1e1b4b; margin-bottom: 10px; }
+        h2 { font-size: 16px; color: #475569; margin-bottom: 25px; }
+
+        .screen { display: none; }
+        .screen.active { display: block; }
+
+        .form-group { text-align: right; margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #475569; }
+        .form-group input {
+            width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; outline: none; font-size: 15px;
+        }
+        .form-group input:focus { border-color: #c084fc; }
+
+        .error-msg { color: #e11d48; font-size: 13px; margin-bottom: 15px; display: none; }
+
+        /* دکمه‌ها */
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 15px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        .btn-start { background-color: #a855f7; color: white; } /* بنفش روشن */
+        .btn-nav { background-color: #3b82f6; color: white; flex: 1; } /* آبی */
+        .btn-finish { background-color: #22c55e; color: white; margin-top: 20px; } /* سبز */
+        .btn:hover { opacity: 0.9; transform: translateY(-2px); }
+        .nav-container { display: flex; gap: 10px; margin-top: 20px; }
+
+        /* سوالات */
+        .q-info { display: flex; justify-content: space-between; font-size: 13px; color: #64748b; margin-bottom: 15px; }
+        .q-text { font-size: 17px; font-weight: 600; color: #1e293b; margin-bottom: 20px; line-height: 1.6; text-align: right; }
+        .options-container { display: flex; flex-direction: column; gap: 12px; }
+        .option {
+            display: flex; align-items: center; text-align: right; padding: 12px;
+            border: 2px solid #f1f5f9; border-radius: 12px; cursor: pointer; font-size: 15px; transition: 0.2s;
+        }
+        .option:hover { background-color: #f8fafc; border-color: #cbd5e1; }
+        .option.selected { background-color: #f3e8ff; border-color: #a855f7; color: #7e22ce; font-weight: bold; }
+        .option-letter {
+            width: 28px; height: 28px; background: #e2e8f0; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; margin-left: 12px; font-size: 13px; flex-shrink: 0;
+        }
+        .option.selected .option-letter { background: #a855f7; color: white; }
+
+        /* نتیجه */
+        .result-score { font-size: 35px; font-weight: 800; color: #1e1b4b; margin: 10px 0; }
+        .result-msg { font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #475569; }
+        .review-area { text-align: right; max-height: 220px; overflow-y: auto; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 13px; }
+        .review-line { padding: 8px 0; border-bottom: 1px solid #f1f5f9; line-height: 1.5; }
+        .correct-text { color: #16a34a; font-weight: bold; }
+        .wrong-text { color: #dc2626; font-weight: bold; }
+
+        @media (max-width: 480px) {
+            .quiz-card { padding: 15px; }
+            h1 { font-size: 19px; }
+            .q-text { font-size: 15px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stars" id="starBox"></div>
+    <div class="moon"></div>
+
+    <div class="quiz-card">
+        <div class="designer-header">طراح بازی: خانم حق نظری</div>
+
+        <!-- صفحه شروع -->
+        <div id="screen-start" class="screen active">
+            <h1>آزمون آنلاین فارسی پنجم</h1>
+            <h2>درس دوم: فضل خدا</h2>
+            <div id="error-name" class="error-msg">لطفاً نام و نام خانوادگی خود را وارد کنید!</div>
+            <div class="form-group">
+                <label>نام:</label>
+                <input type="text" id="input-fname" placeholder="مثلاً: علی">
+            </div>
+            <div class="form-group">
+                <label>نام خانوادگی:</label>
+                <input type="text" id="input-lname" placeholder="مثلاً: محمدی">
+            </div>
+            <button class="btn btn-start" onclick="startQuiz()">شروع آزمون</button>
+        </div>
+
+        <!-- صفحه سوالات -->
+        <div id="screen-quiz" class="screen">
+            <div class="q-info">
+                <span id="user-info-display" style="font-weight: bold; color: #475569;"></span>
+                <span id="q-counter">سؤال ۱ از ۲۰</span>
+            </div>
+            <div id="q-text" class="q-text"></div>
+            <div id="options-box" class="options-container"></div>
+
+            <div class="nav-container">
+                <button id="btn-prev" class="btn btn-nav" onclick="moveQuestion(-1)">سؤال قبل</button>
+                <button id="btn-next" class="btn btn-nav" onclick="moveQuestion(1)">سؤال بعد</button>
+            </div>
+            <button id="btn-finish" class="btn btn-finish" style="display: none;" onclick="confirmFinish()">پایان آزمون و مشاهده نتیجه</button>
+        </div>
+
+        <!-- صفحه نتیجه -->
+        <div id="screen-result" class="screen">
+            <h1>نتیجه آزمون</h1>
+            <div id="res-emoji" style="font-size: 45px; margin-top: 5px;"></div>
+            <div id="res-score" class="result-score"></div>
+            <div id="res-msg" class="result-msg"></div>
+            <div class="review-area" id="review-box"></div>
+            <button class="btn btn-start" style="margin-top:20px" onclick="location.reload()">دوباره امتحان کن</button>
+        </div>
+
+        <div class="designer-footer">طراح بازی: خانم حق نظری</div>
+    </div>
+
+    <script>
+        // تولید ستاره‌ها
+        const starBox = document.getElementById('starBox');
+        for(let i=0; i<50; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            let size = Math.random() * 3;
+            s.style.width = size + 'px';
+            s.style.height = size + 'px';
+            s.style.top = Math.random() * 100 + '%';
+            s.style.left = Math.random() * 100 + '%';
+            s.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+            starBox.appendChild(s);
+        }
+
+        // لیست دقیق ۲۰ سوال
+        const questions = [
+            { q: "چه کسی می‌تواند فضل و بخشش خداوند را بشمارد؟", o: ["الف) همه انسان‌ها", "ب) فقط شاعران", "ج) هیچ‌کس", "د) فقط دانشمندان"], a: 2 },
+            { q: "در شعر فضل خدا منظور از «فضل» چیست؟", o: ["الف) آرامش", "ب) قدرت", "ج) دانش", "د) بخشش"], a: 3 },
+            { q: "«بحر» در درس فضل خدا به چه معناست؟", o: ["الف) خشکی", "ب) آسمان", "ج) دریا", "د) رودخانه"], a: 2 },
+            { q: "«لیل و نهار» به ترتیب چه معنی دارند؟", o: ["الف) شب و روز", "ب) دریا و خشکی", "ج) روز و شب", "د) خورشید و ماه"], a: 0 },
+            { q: "کدام گزینه معنی «بر» دارد؟", o: ["الف) ستاره", "ب) روز", "ج) شب", "د) خشکی"], a: 3 },
+            { q: "در شعر، خداوند چه چیزهایی را آفریده است؟", o: ["الف) فقط خورشید و ماه", "ب) فقط جانوران", "ج) فقط انسان و درخت", "د) دریا، خشکی، درختان، آدمی و دیگر پدیده‌ها"], a: 3 },
+            { q: "منظور از «انجم» در درس چیست؟", o: ["الف) ابرها", "ب) ستارگان", "ج) درختان", "د) گل‌ها"], a: 1 },
+            { q: "تاثیر آفتاب بر خاک مرده در شعر به چه نتیجه‌ای می‌انجامد؟", o: ["الف) خشک شدن درختان", "ب) پدید آمدن بوستان و چمن و لاله زار", "ج) تاریک شدن آسمان", "د) پدید آمدن شب"], a: 1 },
+            { q: "«شاخه برهنه» در شعر به چه معناست؟", o: ["الف) شاخه‌ای پر از میوه", "ب) شاخه‌ای بدون برگ و پوشش", "ج) شاخه‌ای شکسته", "د) شاخه‌ای بسیار بلند"], a: 1 },
+            { q: "در بیت مربوط به ابر و درختان «پیرهن» به چه چیزی اشاره دارد؟", o: ["الف) آب باران", "ب) خاک", "ج) برگ و شکوفه‌های بهاری", "د) ریشه درختان"], a: 2 },
+            { q: "کدام گزینه با مفهوم «توحیدگوی او نه بنی آدمند و بس» هماهنگی دارد؟", o: ["الف) فقط انسان‌ها خدا را ستایش می‌کنند", "ب) همه موجودات خداوند را به شیوه‌های خود ستایش می‌کنند", "ج) فقط پرندگان", "د) فقط پرندگان و درختان"], a: 1 },
+            { q: "در مصراع «هر بلبلی که زمزمه بر شاخسار کرد» «زمزمه» به چه معنا است؟", o: ["الف) سکوت", "ب) آواز و نغمه", "ج) فریاد", "د) گریه"], a: 1 },
+            { q: "کدام گزینه هم‌خانواده «فضل» است؟", o: ["الف) فاضل", "ب) فضا", "ج) فصل", "د) فصول"], a: 0 },
+            { q: "کدام گزینه هم‌خانواده «شکر» است؟", o: ["الف) شاکر", "ب) شکوفه", "ج) شکسته", "د) شکار"], a: 0 },
+            { q: "کدام گزینه متضاد «مغرور» است؟", o: ["الف) خودبین", "ب) متکبر", "ج) فروتن", "د) شاد"], a: 2 },
+            { q: "کدام گزینه متضاد «مرده» است؟", o: ["الف) برهنه", "ب) زنده", "ج) غمگین", "د) کوچک"], a: 1 },
+            { q: "اگر بخواهیم متن تبریک را برای فردی موفق بخوانیم، لحن گفتار ما باید چگونه باشد؟", o: ["الف) همراه با شادی", "ب) همراه با غم", "ج) همراه با خشم", "د) با ترس"], a: 0 },
+            { q: "اگر بخواهیم متن تسلیت را بخوانیم لحن و حالت گفتار باید چگونه باشد؟", o: ["الف) همراه با شادی", "ب) همراه با غم و همدردی", "ج) با هیجان", "د) با خنده"], a: 1 },
+            { q: "کدام گزینه درباره دو واژه «بحر و بر» درست است؟", o: ["الف) هم‌معنی‌اند", "ب) هم‌خانواده‌اند", "ج) متضادند", "د) هر دو به معنی شب هستند"], a: 2 },
+            { q: "پیام اصلی شعر «فضل خدا» کدام است؟", o: ["الف) نعمت‌ها و بخشش‌های خداوند فراوانند و باید شکرگزار باشیم", "ب) انسان از گناه دوری کند", "ج) شب از روز بهتر است", "د) فصل بهار فصل زیبایی است"], a: 0 }
+        ];
+
+        let currentIdx = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let nameStr = "";
+
+        function startQuiz() {
+            const fn = document.getElementById('input-fname').value.trim();
+            const ln = document.getElementById('input-lname').value.trim();
+            if(!fn || !ln) {
+                document.getElementById('error-name').style.display = 'block';
+                return;
+            }
+            nameStr = fn + " " + ln;
+            document.getElementById('user-info-display').innerText = nameStr;
+            document.getElementById('screen-start').classList.remove('active');
+            document.getElementById('screen-quiz').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentIdx];
+            document.getElementById('q-counter').innerText = `سؤال ${toPersianNum(currentIdx + 1)} از ${toPersianNum(questions.length)}`;
+            document.getElementById('q-text').innerText = `${toPersianNum(currentIdx + 1)}. ${q.q}`;
+            
+            const box = document.getElementById('options-box');
+            box.innerHTML = '';
+            
+            q.o.forEach((opt, i) => {
+                const div = document.createElement('div');
+                div.className = `option ${userAnswers[currentIdx] === i ? 'selected' : ''}`;
+                div.onclick = () => selectOpt(i);
+                
+                const letters = ['الف', 'ب', 'ج', 'د'];
+                div.innerHTML = `<div class="option-letter">${letters[i]}</div><div>${opt.substring(3)}</div>`;
+                box.appendChild(div);
+            });
+
+            document.getElementById('btn-prev').style.visibility = currentIdx === 0 ? 'hidden' : 'visible';
+            if(currentIdx === questions.length - 1) {
+                document.getElementById('btn-next').style.display = 'none';
+                document.getElementById('btn-finish').style.display = 'block';
+            } else {
+                document.getElementById('btn-next').style.display = 'block';
+                document.getElementById('btn-finish').style.display = 'none';
+            }
+        }
+
+        function selectOpt(i) {
+            userAnswers[currentIdx] = i;
+            renderQuestion();
+            // تاخیر کوتاه برای رفتن به سوال بعدی
+            if(currentIdx < questions.length - 1) {
+                setTimeout(() => {
+                    currentIdx++;
+                    renderQuestion();
+                }, 350);
+            }
+        }
+
+        function moveQuestion(step) {
+            currentIdx += step;
+            if(currentIdx < 0) currentIdx = 0;
+            if(currentIdx >= questions.length) currentIdx = questions.length - 1;
+            renderQuestion();
+        }
+
+        function confirmFinish() {
+            if(confirm("آیا از پایان آزمون و ثبت پاسخ‌ها مطمئن هستید؟")) {
+                finishQuiz();
+            }
+        }
+
+        function finishQuiz() {
+            let score = 0;
+            let reviewHtml = "<strong>کلید و بررسی پاسخ‌ها:</strong><br><br>";
+
+            questions.forEach((q, idx) => {
+                const userAns = userAnswers[idx];
+                const isCorrect = userAns === q.a;
+                if(isCorrect) score++;
+
+                const letters = ['الف', 'ب', 'ج', 'د'];
+                const userText = userAns !== null ? `${letters[userAns]}) ${q.o[userAns].substring(3)}` : "پاسخ نداده";
+                const correctText = `${letters[q.a]}) ${q.o[q.a].substring(3)}`;
+
+                reviewHtml += `<div class="review-line">
+                    <strong>سؤال ${toPersianNum(idx + 1)}:</strong> ${q.q}<br>
+                    پاسخ شما: <span class="${isCorrect ? 'correct-text' : 'wrong-text'}">${userText}</span><br>`;
+                if(!isCorrect) {
+                    reviewHtml += `پاسخ صحیح: <span class="correct-text">${correctText}</span>`;
+                }
+                reviewHtml += `</div>`;
+            });
+
+            document.getElementById('screen-quiz').classList.remove('active');
+            document.getElementById('screen-result').classList.add('active');
+
+            document.getElementById('res-score').innerText = `نمره شما: ${toPersianNum(score)} از ${toPersianNum(20)}`;
+            
+            let emoji = "";
+            let msg = "";
+            if(score >= 18) {
+                emoji = "🌟🏆";
+                msg = "عالی! آفرین بر دانش‌آموز سخت‌کوش و باهوش.";
+            } else if(score >= 15) {
+                emoji = "👏😊";
+                msg = "خیلی خوب! عملکری عالی داشتی.";
+            } else if(score >= 10) {
+                emoji = "👍📖";
+                msg = "خوب، نیازمند مرور بیشتر روی متن درس.";
+            } else {
+                emoji = "💪🎯";
+                msg = "نیاز به تلاش بیشتر. حتماً درس را یک‌بار دیگر با دقت بخوان.";
+            }
+
+            document.getElementById('res-emoji').innerText = emoji;
+            document.getElementById('res-msg').innerText = msg;
+            document.getElementById('review-box').innerHTML = reviewHtml;
+        }
+
+        function toPersianNum(num) {
+            const persianDigits = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+            return num.toString().replace(/\d/g, x => persianDigits[x]);
+        }
+    </script>
+</body>
+</html>

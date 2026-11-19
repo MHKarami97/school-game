@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>اتاق فرار انشانویسی؛ راز کتابخانه جادویی</title>
+<style>
+:root{--ink:#263451;--muted:#66738a;--purple:#6753a6;--purple2:#eee9fb;--pink:#f8e8f0;--gold:#f3c96b;--paper:#fffdf9;--line:#e5e0ed;--green:#27775b;--red:#a33d50}
+*{box-sizing:border-box}
+body{margin:0;padding:20px;background:linear-gradient(135deg,#f4eefb,#fdf1f5 55%,#fff8e9);font-family:Tahoma,Arial,sans-serif;color:var(--ink);line-height:1.9}
+.wrap{max-width:850px;margin:0 auto}
+.hero,.panel{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 8px 24px rgba(55,44,85,.07)}
+.hero{text-align:center}
+.illustration{font-size:48px;letter-spacing:8px;margin-bottom:6px}
+h1{font-size:clamp(23px,4vw,34px);margin:4px 0;color:#55428f}
+h2{font-size:22px;margin:0 0 8px}
+p{margin:8px 0}
+.tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px}
+.tag{background:var(--purple2);border-radius:30px;padding:4px 12px;font-size:13px}
+button{border:0;border-radius:13px;padding:12px 18px;font:inherit;font-weight:bold;cursor:pointer;min-height:46px}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid #d08db1;outline-offset:2px}
+.primary{background:var(--purple);color:white}
+.secondary{background:var(--purple2);color:#453875;border:1px solid #d8cfee}
+button:disabled{opacity:.5;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.hidden{display:none!important}
+.topline{display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 2px 10px}
+.progress{display:flex;gap:6px;margin:8px 0 16px}
+.progress span{height:9px;flex:1;border-radius:10px;background:#e7e3ed}
+.progress span.done{background:#6eaa8c}
+.room{border-right:6px solid #b58ac3}
+.room-icon{font-size:40px}
+.story{background:#f8f4fc;border-radius:14px;padding:14px;margin:12px 0}
+label{display:block;font-weight:bold;margin:12px 0 6px}
+textarea,input{width:100%;border:1px solid #d9d2e4;border-radius:12px;padding:12px;font:inherit;font-size:16px;background:white;color:var(--ink)}
+textarea{min-height:120px;resize:vertical}
+.muted{color:var(--muted);font-size:14px}
+.feedback{font-weight:bold;margin-top:12px;min-height:30px}
+.hint{background:#fff8e6;border:1px solid #f0dfae;border-radius:12px;padding:10px;margin-top:10px}
+.scorebox{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px}
+.sample{background:#fff8e9;border:1px dashed #d8b96d;border-radius:14px;padding:13px;margin-top:12px}
+footer{text-align:center;color:var(--muted);font-size:12px;margin:16px}
+@media(max-width:520px){body{padding:10px}.hero,.panel{padding:16px}.scorebox{align-items:flex-start;flex-direction:column}.actions button{flex:1}}
+</style>
+</head>
+<body>
+<main class="wrap">
+<section class="hero" id="intro">
+ <div class="illustration">🏰 🔐 📚</div>
+ <h1>اتاق فرار انشانویسی</h1>
+ <h2>راز کتابخانه جادویی</h2>
+ <p>چهار اتاق، چهار مأموریت نوشتاری و یک رمز نهایی!</p>
+ <div class="tags"><span class="tag">پایه پنجم</span><span class="tag">نگارش خلاق</span><span class="tag">بازی معمایی</span></div>
+ <p>کتابدار مهربان، کلید کتابخانه را گم کرده است. برای پیدا کردن آن باید چهار قفل را باز کنی. هر قفل با فکر کردن و نوشتن باز می‌شود.</p>
+ <button class="primary" id="startBtn">🚪 ورود به کتابخانه</button>
+</section>
+
+<section id="game" class="hidden">
+ <div class="topline"><strong id="roomLabel">اتاق اول</strong><span id="progressText" class="tag">۰ از ۴ قفل باز شده</span></div>
+ <div class="progress" id="progressBars"><span></span><span></span><span></span><span></span></div>
+ <section class="panel room">
+  <div class="room-icon" id="roomIcon">🗝️</div>
+  <h2 id="roomTitle"></h2>
+  <div class="story" id="storyText"></div>
+  <div id="taskArea"></div>
+  <div id="hintText" class="hint hidden"></div>
+  <div class="feedback" id="feedback" aria-live="polite"></div>
+  <div class="actions">
+   <button class="secondary" id="hintBtn">💡 راهنمایی</button>
+   <button class="primary" id="checkBtn">بررسی پاسخ</button>
+   <button class="primary hidden" id="nextBtn">رفتن به اتاق بعدی ←</button>
+  </div>
+ </section>
+ <div class="panel scorebox"><strong>⭐ امتیاز مأموریت‌ها: <span id="score">۰</span> از ۱۰۰</strong><button class="secondary" id="restartBtn">شروع دوباره</button></div>
+</section>
+
+<section id="finish" class="panel hidden" style="text-align:center;margin-top:18px">
+ <div class="illustration">🏆 🔑</div>
+ <h1>آفرین، نویسنده خلاق!</h1>
+ <p>تو هر چهار قفل را باز کردی و راز کتابخانه را کشف کردی.</p>
+ <h2>امتیاز تو: <span id="finalScore">۰</span> از ۱۰۰</h2>
+ <p class="muted">هر داستان خوب با یک ایده کوچک آغاز می‌شود. حالا می‌توانی داستان خودت را کامل‌تر و زیباتر کنی.</p>
+ <button class="primary" id="againBtn">بازی دوباره</button>
+</section>
+<footer>بازی آموزشی نگارش خلاق • قابل اجرا به‌صورت آفلاین در مرورگر</footer>
+</main>
+
+<script>
+(() => {
+ const $ = id => document.getElementById(id);
+ let room = 0, score = 0, opened = [false,false,false,false];
+ const fa = n => String(n).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[Number(d)]);
+ const titles = ['اتاق اول: واژه‌های گمشده','اتاق دوم: جمله‌های آشفته','اتاق سوم: پایان داستان','اتاق چهارم: نامه رمزآلود'];
+ const hints = [
+  'جمله‌ای بساز که هر سه واژه «باران»، «پنجره» و «امید» در آن باشند. می‌توانی از توصیف و احساس هم کمک بگیری.',
+  'اول سارا پرنده را می‌بیند؛ بعد برای کمک به آن اقدام می‌کند؛ در پایان پرنده را به لانه بازمی‌گرداند.',
+  'به این فکر کن که کلید چه دری را باز می‌کند و دخترک پس از باز شدن در با چه چیزی روبه‌رو می‌شود.',
+  'نامه باید با سلام آغاز شود، یک توصیه روشن داشته باشد و با خداحافظی پایان پیدا کند.'
+ ];
+ function renderRoom(){
+  $('roomLabel').textContent=titles[room];
+  $('roomTitle').textContent=titles[room];
+  $('progressText').textContent=fa(opened.filter(Boolean).length)+' از ۴ قفل باز شده';
+  $('score').textContent=fa(score);
+  $('roomIcon').textContent=['🗝️','🧩','📖','✉️'][room];
+  $('feedback').textContent='';
+  $('hintText').classList.add('hidden');
+  $('nextBtn').classList.add('hidden');
+  $('checkBtn').classList.remove('hidden');
+  $('hintBtn').classList.remove('hidden');
+  [...$('progressBars').children].forEach((bar,i)=>bar.classList.toggle('done',opened[i]));
+  const task=$('taskArea');
+  if(room===0){
+   $('storyText').textContent='روی میز، سه واژه پراکنده شده‌اند. برای باز شدن قفل، جمله‌ای زیبا بساز که هر سه واژه «باران»، «پنجره» و «امید» در آن باشد.';
+   task.innerHTML='<label for="answer">جمله خلاقانه خودت را بنویس:</label><textarea id="answer" placeholder="باران ..."></textarea><p class="muted">راهنمایی: می‌توانی از صفت، تشبیه یا بیان احساس استفاده کنی.</p>';
+  } else if(room===1){
+   $('storyText').textContent='سه جمله از یک داستان به هم ریخته‌اند. آن‌ها را به ترتیب منطقی مرتب کن تا راهروی بعدی باز شود.';
+   task.innerHTML='<div class="sample"><p><b>الف)</b> سرانجام، پرنده را به لانه‌اش بازگرداند.</p><p><b>ب)</b> یک روز، سارا پرنده کوچکی را کنار باغچه دید.</p><p><b>پ)</b> او با احتیاط پرنده را برداشت و به دنبال لانه گشت.</p></div><label for="answer">ترتیب درست را با حروف بنویس:</label><input id="answer" placeholder="مثلاً: ب، پ، الف"><p class="muted">اولین اتفاق، اتفاق بعدی و پایان را پیدا کن.</p>';
+  } else if(room===2){
+   $('storyText').textContent='داستان نیمه‌تمام: «دخترک در راه مدرسه، کلیدی طلایی پیدا کرد. روی کلید نوشته شده بود: فقط کسی می‌تواند از آن استفاده کند که ...» حالا تو داستان را ادامه بده!';
+   task.innerHTML='<label for="answer">حداقل دو یا سه جمله برای ادامه داستان بنویس:</label><textarea id="answer" placeholder="دخترک با تعجب ..."></textarea><p class="muted">یک اتفاق جالب و یک پایان مناسب برای داستان در نظر بگیر.</p>';
+  } else {
+   $('storyText').textContent='کتابدار از تو خواسته برای دانش‌آموزان آینده نامه‌ای بنویسی و یک توصیه ارزشمند درباره کتاب‌خواندن به آن‌ها هدیه بدهی.';
+   task.innerHTML='<label for="answer">نامه کوتاه خود را بنویس:</label><textarea id="answer" placeholder="دوستان عزیز آینده ..."></textarea><p class="muted">نامه باید سلام، پیام اصلی و خداحافظی داشته باشد.</p>';
+  }
+ }
+ function normalize(s){return s.replace(/\s/g,'').replace(/[،,؛;]/g,'').replace(/-/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک');}
+ $('startBtn').addEventListener('click',()=>{$('intro').classList.add('hidden');$('game').classList.remove('hidden');renderRoom();});
+ $('hintBtn').addEventListener('click',()=>{$('hintText').textContent='💡 '+hints[room];$('hintText').classList.remove('hidden');});
+ $('checkBtn').addEventListener('click',()=>{
+  const answer=$('answer').value.trim();
+  if(!answer){$('feedback').textContent='✏️ اول پاسخ خودت را بنویس.';return;}
+  let valid=false;
+  if(room===0) valid=['باران','پنجره','امید'].every(w=>answer.includes(w)) && answer.length>=20;
+  if(room===1) valid=normalize(answer)==='بپالف'||normalize(answer)==='بپالف';
+  if(room===2) valid=answer.length>=55 && answer.split(/[.!؟]/).filter(x=>x.trim()).length>=2;
+  if(room===3) valid=answer.length>=65 && /(سلام|درود)/.test(answer) && /(خداحافظ|بدرود|به امید دیدار)/.test(answer);
+  if(valid){
+   if(!opened[room]){opened[room]=true;score+=25;}
+   $('feedback').textContent=room===1?'🔓 آفرین! ترتیب جمله‌ها درست است و قفل باز شد.':'🔓 آفرین! مأموریت نوشتاری انجام شد و قفل باز شد.';
+   $('checkBtn').classList.add('hidden');$('hintBtn').classList.add('hidden');
+   $('nextBtn').textContent=room===3?'مشاهده نتیجه نهایی 🏆':'رفتن به اتاق بعدی ←';
+   $('nextBtn').classList.remove('hidden');$('score').textContent=fa(score);
+   $('progressText').textContent=fa(opened.filter(Boolean).length)+' از ۴ قفل باز شده';
+   [...$('progressBars').children].forEach((bar,i)=>bar.classList.toggle('done',opened[i]));
+  } else {
+   const messages=[
+    'هنوز هر سه واژه در جمله‌ات نیستند یا جمله خیلی کوتاه است. دوباره تلاش کن.',
+    'ترتیب را دوباره بررسی کن: اول دیدن پرنده، بعد کمک کردن و در پایان بازگرداندن آن. پاسخ را به شکل «ب، پ، الف» بنویس.',
+    'پاسخت را کامل‌تر کن؛ دست‌کم دو جمله بنویس و داستان را به یک پایان برسان.',
+    'نامه را کامل‌تر کن؛ سلام، توصیه درباره کتاب‌خواندن و خداحافظی را فراموش نکن.'
+   ];
+   $('feedback').textContent='🔎 '+messages[room];
+  }
+ });
+ function reset(){
+  room=0;score=0;opened=[false,false,false,false];
+  $('finish').classList.add('hidden');$('game').classList.remove('hidden');renderRoom();
+ }
+ $('nextBtn').addEventListener('click',()=>{
+  if(room===3){$('game').classList.add('hidden');$('finish').classList.remove('hidden');$('finalScore').textContent=fa(score);}
+  else{room++;renderRoom();}
+ });
+ $('restartBtn').addEventListener('click',reset);
+ $('againBtn').addEventListener('click',reset);
+})();
+</script>
+</body>
+</html>
